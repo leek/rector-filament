@@ -1,0 +1,30 @@
+{
+    "name": "leek/rector-filament",
+    "type": "rector-extension",
+    "description": "Rector rules for Filament v4 upgrades and code quality.",
+    "keywords": [
+        "filament",
+        "rector",
+        "laravel"
+    ],
+    "homepage": "https://github.com/leek/rector-filament",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Lee",
+            "homepage": "https://github.com/leek",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "rector/rector": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "RectorFilament\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
