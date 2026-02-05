@@ -96,6 +96,10 @@ CODE_SAMPLE
      */
     public function refactor(Node $node): ?Node
     {
+        if ($node->isFirstClassCallable()) {
+            return null;
+        }
+
         if (! $this->isFilamentContext($node)) {
             return null;
         }
