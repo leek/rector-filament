@@ -8,6 +8,7 @@ use RectorFilament\Rector\MethodCall\BulkActionsToToolbarActionsRector;
 use RectorFilament\Rector\MethodCall\FiltersLayoutArgToMethodRector;
 use RectorFilament\Rector\MethodCall\LivewireComponentParamNameRector;
 use RectorFilament\Rector\MethodCall\ModelToRecordClosureParamRector;
+use RectorFilament\Rector\MethodCall\PlaceholderToTextEntryRector;
 use RectorFilament\Rector\MethodCall\TableActionsToRecordActionsRector;
 use RectorFilament\Rector\UseImport\ActionsNamespaceRector;
 use RectorFilament\Rector\UseImport\GetSetNamespaceRector;
@@ -24,4 +25,5 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->rule(TableActionsToRecordActionsRector::class);
     $rectorConfig->rule(BulkActionsToToolbarActionsRector::class);
     $rectorConfig->rule(FiltersLayoutArgToMethodRector::class);
+    $rectorConfig->rule(PlaceholderToTextEntryRector::class);
 };
