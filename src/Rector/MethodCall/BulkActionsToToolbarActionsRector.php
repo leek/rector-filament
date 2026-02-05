@@ -102,7 +102,7 @@ CODE_SAMPLE
 
         // Otherwise, wrap the actions in BulkActionGroup::make() and an array.
         $bulkActionGroupCall = new StaticCall(
-            new FullyQualified('Filament\\Tables\\Actions\\BulkActionGroup'),
+            new FullyQualified('Filament\\Actions\\BulkActionGroup'),
             'make',
             [new Arg($firstArg)]
         );
@@ -140,7 +140,8 @@ CODE_SAMPLE
 
         $className = $node->class->toString();
 
-        return $className === 'Filament\\Tables\\Actions\\BulkActionGroup'
+        return $className === 'Filament\\Actions\\BulkActionGroup'
+            || $className === 'Filament\\Tables\\Actions\\BulkActionGroup'
             || str_ends_with($className, 'BulkActionGroup');
     }
 }

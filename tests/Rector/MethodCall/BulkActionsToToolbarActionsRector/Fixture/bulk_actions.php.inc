@@ -21,7 +21,7 @@ use Filament\Tables\Table;
 
 function configureTable(Table $table): Table
 {
-    return $table->toolbarActions([\Filament\Tables\Actions\BulkActionGroup::make([
+    return $table->toolbarActions([\Filament\Actions\BulkActionGroup::make([
         \Filament\Tables\Actions\DeleteBulkAction::make(),
     ])]);
 }
