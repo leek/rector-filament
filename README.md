@@ -1,3 +1,10 @@
+<p align="center">
+  <img
+    src="https://github.com/user-attachments/assets/b92808b1-bef3-4340-84ac-229c3e681ad7"
+    width="260"
+  />
+</p>
+
 # Rector Rules for Filament
 
 [Rector](https://github.com/rectorphp/rector) rules for [Filament](https://filamentphp.com/) v4 upgrades and code quality.
