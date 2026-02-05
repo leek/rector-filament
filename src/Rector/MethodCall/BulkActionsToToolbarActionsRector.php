@@ -79,27 +79,45 @@ CODE_SAMPLE
 
         $firstArg = $args[0]->value;
 
-        // Skip if already wrapped in BulkActionGroup::make()
+        // If the argument is an array that already contains a BulkActionGroup::make(),
+        // just rename the method — no wrapping needed.
+        if ($firstArg instanceof Array_ && $this->arrayContainsBulkActionGroup($firstArg)) {
+            $node->name = new Identifier('toolbarActions');
+
+            return $node;
+        }
+
+        // If the argument is a bare BulkActionGroup::make() (not in an array),
+        // wrap it in an array and rename.
         if ($this->isBulkActionGroupMake($firstArg)) {
             $node->name = new Identifier('toolbarActions');
-            // Wrap the existing BulkActionGroup::make() in an array
             $node->args = [new Arg(new Array_([new Node\Expr\ArrayItem($firstArg)]))];
 
             return $node;
         }
 
-        // Wrap: BulkActionGroup::make($originalArg)
+        // Otherwise, wrap the actions in BulkActionGroup::make() and an array.
         $bulkActionGroupCall = new StaticCall(
             new FullyQualified('Filament\\Tables\\Actions\\BulkActionGroup'),
             'make',
             [new Arg($firstArg)]
         );
 
-        // Wrap in array: [BulkActionGroup::make([...])]
         $node->args = [new Arg(new Array_([new Node\Expr\ArrayItem($bulkActionGroupCall)]))];
         $node->name = new Identifier('toolbarActions');
 
         return $node;
+    }
+
+    private function arrayContainsBulkActionGroup(Array_ $array): bool
+    {
+        foreach ($array->items as $item) {
+            if ($item !== null && $this->isBulkActionGroupMake($item->value)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function isBulkActionGroupMake(Node $node): bool

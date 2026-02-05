@@ -8,7 +8,6 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Closure;
 use PhpParser\Node\Expr\MethodCall;
-use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\NullableType;
 use RectorFilament\AbstractRector;
@@ -85,22 +84,7 @@ CODE_SAMPLE
                     continue;
                 }
 
-                $oldName = $paramName;
-
-                // Rename param
-                $param->var = new Variable('livewire');
-
-                // Rename usages in body
-                $nodes = $callable instanceof Closure ? $callable->stmts : [$callable->expr];
-
-                $this->traverseNodesWithCallable($nodes, function (Node $node) use ($oldName): ?Node {
-                    if ($node instanceof Variable && $node->name === $oldName) {
-                        return new Variable('livewire');
-                    }
-
-                    return null;
-                });
-
+                $this->renameClosureParam($callable, $param, $paramName, 'livewire');
                 $changed = true;
             }
         }

@@ -71,11 +71,34 @@ CODE_SAMPLE
             return null;
         }
 
-        // Extract the layout argument (2nd arg)
-        $layoutArg = $args[1];
+        // Resolve by named argument when present, fall back to positional order
+        $filtersArg = null;
+        $layoutArg = null;
 
-        // Keep only the first argument on ->filters()
-        $node->args = [new Arg($args[0]->value)];
+        foreach ($args as $arg) {
+            if ($arg->name instanceof Identifier) {
+                match ($arg->name->name) {
+                    'layout' => $layoutArg = $arg,
+                    'filters' => $filtersArg = $arg,
+                    default => null,
+                };
+            }
+        }
+
+        // Fall back to positional: filters is 1st, layout is 2nd
+        if ($filtersArg === null) {
+            $filtersArg = $args[0];
+        }
+        if ($layoutArg === null) {
+            $layoutArg = $args[1] ?? null;
+        }
+
+        if ($layoutArg === null) {
+            return null;
+        }
+
+        // Keep only the filters argument on ->filters()
+        $node->args = [new Arg($filtersArg->value)];
 
         // Chain ->filtersLayout($layoutArg) after ->filters()
         return new MethodCall(

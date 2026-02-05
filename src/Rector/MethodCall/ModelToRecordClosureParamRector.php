@@ -8,7 +8,6 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Closure;
 use PhpParser\Node\Expr\MethodCall;
-use PhpParser\Node\Expr\Variable;
 use RectorFilament\AbstractRector;
 use RectorFilament\Rector\Concerns\DetectsFilamentContext;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
@@ -69,7 +68,6 @@ CODE_SAMPLE
                 continue;
             }
 
-            // Check if $record already exists as a param
             $hasRecord = false;
             $modelParam = null;
             foreach ($callable->params as $param) {
@@ -86,20 +84,7 @@ CODE_SAMPLE
                 continue;
             }
 
-            // Rename param
-            $modelParam->var = new Variable('record');
-
-            // Rename usages in body
-            $nodes = $callable instanceof Closure ? $callable->stmts : [$callable->expr];
-
-            $this->traverseNodesWithCallable($nodes, function (Node $node): ?Node {
-                if ($node instanceof Variable && $node->name === 'model') {
-                    return new Variable('record');
-                }
-
-                return null;
-            });
-
+            $this->renameClosureParam($callable, $modelParam, 'model', 'record');
             $changed = true;
         }
 
