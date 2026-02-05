@@ -12,27 +12,28 @@ use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 
 /**
- * In Filament v4, action classes moved from Filament\Tables\Actions\*
- * to Filament\Actions\*. This rule updates the use imports.
+ * In Filament v4, the Get and Set utility classes moved from Filament\Forms\*
+ * to Filament\Schemas\Components\Utilities\*. This rule updates the use imports.
  */
-final class TableActionsNamespaceRector extends AbstractRector
+final class GetSetNamespaceRector extends AbstractRector
 {
-    private const OLD_PREFIX = 'Filament\\Tables\\Actions';
-
-    private const NEW_PREFIX = 'Filament\\Actions';
+    private const CLASS_MAP = [
+        'Filament\\Forms\\Get' => 'Filament\\Schemas\\Components\\Utilities\\Get',
+        'Filament\\Forms\\Set' => 'Filament\\Schemas\\Components\\Utilities\\Set',
+    ];
 
     public function getRuleDefinition(): RuleDefinition
     {
-        return new RuleDefinition('Update Filament\Tables\Actions\* imports to Filament\Actions\*.', [
+        return new RuleDefinition('Update Filament\Forms\{Get,Set} imports to Filament\Schemas\Components\Utilities\*.', [
             new CodeSample(
                 <<<'CODE_SAMPLE'
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 CODE_SAMPLE
                 ,
                 <<<'CODE_SAMPLE'
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 CODE_SAMPLE
             ),
         ]);
@@ -53,13 +54,11 @@ CODE_SAMPLE
     {
         $name = $node->name->toString();
 
-        if (! str_starts_with($name, self::OLD_PREFIX)) {
+        if (! isset(self::CLASS_MAP[$name])) {
             return null;
         }
 
-        $newName = self::NEW_PREFIX . substr($name, strlen(self::OLD_PREFIX));
-
-        $node->name = new Name($newName);
+        $node->name = new Name(self::CLASS_MAP[$name]);
 
         return $node;
     }
