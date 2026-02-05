@@ -171,7 +171,7 @@ CODE_SAMPLE
             if ($parent instanceof Namespace_ && $parent->name !== null) {
                 $namespace = $parent->name->toString();
                 foreach (self::FILAMENT_NAMESPACE_PREFIXES as $prefix) {
-                    if (str_starts_with($namespace, rtrim($prefix, '\\'))) {
+                    if (str_starts_with($namespace, $prefix)) {
                         return true;
                     }
                 }
