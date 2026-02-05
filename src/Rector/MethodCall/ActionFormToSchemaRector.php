@@ -57,6 +57,10 @@ CODE_SAMPLE
      */
     public function refactor(Node $node): ?Node
     {
+        if ($node->isFirstClassCallable()) {
+            return null;
+        }
+
         if (! $node->name instanceof Identifier) {
             return null;
         }

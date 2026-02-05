@@ -53,6 +53,10 @@ CODE_SAMPLE
      */
     public function refactor(Node $node): ?Node
     {
+        if ($node->isFirstClassCallable()) {
+            return null;
+        }
+
         $callable = $this->findModifyQueryUsingClosure($node);
         if ($callable === null) {
             return null;
