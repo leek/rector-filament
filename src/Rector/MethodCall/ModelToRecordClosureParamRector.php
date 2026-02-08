@@ -88,6 +88,16 @@ CODE_SAMPLE
                 continue;
             }
 
+            // Skip when $model is typed as `string` — in Filament, `string $model`
+            // receives the model class string, while `$record` receives a Model
+            // instance. Renaming would change the resolved value and break at runtime.
+            if ($modelParam->type instanceof Node\Identifier && $modelParam->type->name === 'string') {
+                continue;
+            }
+            if ($modelParam->type instanceof Node\Name && $this->getName($modelParam->type) === 'string') {
+                continue;
+            }
+
             $this->renameClosureParam($callable, $modelParam, 'model', 'record');
             $changed = true;
         }
