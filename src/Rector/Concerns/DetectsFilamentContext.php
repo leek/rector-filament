@@ -58,6 +58,11 @@ trait DetectsFilamentContext
         // 2. Walk chained method calls to find originating static call
         $className = $this->resolveChainedStaticCallClassName($node->var);
         if ($className !== null) {
+            // Check if the resolved FQ class name is in the Filament namespace
+            if (str_starts_with($className, 'Filament\\')) {
+                return true;
+            }
+
             foreach (self::FILAMENT_BASE_TYPES as $type) {
                 $shortName = substr($type, strrpos($type, '\\') + 1);
                 if ($className === $type || str_ends_with($className, $shortName)) {
