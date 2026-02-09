@@ -122,8 +122,8 @@ CODE_SAMPLE
             return $node;
         }
 
-        // Only transform if this is a Filament component
-        if (! $this->isFilamentClass($rootClassName)) {
+        // Only transform if this is a Filament schema/form component
+        if (! $this->isComponentClass($rootClassName)) {
             return null;
         }
 
@@ -188,9 +188,10 @@ CODE_SAMPLE
         return false;
     }
 
-    private function isFilamentClass(string $className): bool
+    private function isComponentClass(string $className): bool
     {
-        return str_starts_with($className, 'Filament\\');
+        return str_starts_with($className, 'Filament\\Schemas\\Components\\')
+            || str_starts_with($className, 'Filament\\Forms\\Components\\');
     }
 
     private function isColumnClass(string $className): bool
