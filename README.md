@@ -153,6 +153,62 @@ Extracts the second argument of `->filters()` into a chained `->filtersLayout()`
 +    ->filtersLayout(FiltersLayout::AboveContent);
 ```
 
+##### ReactiveToLiveRector
+
+Renames `->reactive()` to `->live()` on Filament components.
+
+```diff
+ TextInput::make('name')
+-    ->reactive();
++    ->live();
+```
+
+##### MutateFormDataUsingToMutateDataUsingRector
+
+Renames `->mutateFormDataUsing()` to `->mutateDataUsing()` on Actions.
+
+```diff
+ Action::make('create')
+-    ->mutateFormDataUsing(fn (array $data) => $data);
++    ->mutateDataUsing(fn (array $data) => $data);
+```
+
+##### ImageColumnSizeToImageSizeRector
+
+Renames `->size()` to `->imageSize()` on `ImageColumn`.
+
+```diff
+ ImageColumn::make('avatar')
+-    ->size(50);
++    ->imageSize(50);
+```
+
+##### PlaceholderToTextEntryRector
+
+Replaces `Placeholder::make()->content()` with `TextEntry::make()->state()` and updates the use import.
+
+```diff
+-use Filament\Forms\Components\Placeholder;
++use Filament\Infolists\Components\TextEntry;
+
+-Placeholder::make('name')->content('value');
++TextEntry::make('name')->state('value');
+```
+
+##### EmptyLabelToHiddenLabelRector
+
+Replaces `->label('')` with `->hiddenLabel()` on components, or `->iconButton()` on Actions. Table Columns are skipped.
+
+```diff
+ TextInput::make('name')
+-    ->label('');
++    ->hiddenLabel();
+
+ Action::make('delete')
+-    ->label('');
++    ->iconButton();
+```
+
 #### Closure Parameter Renames
 
 ##### ModelToRecordClosureParamRector
