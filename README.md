@@ -183,6 +183,18 @@ Renames `->size()` to `->imageSize()` on `ImageColumn`.
 +    ->imageSize(50);
 ```
 
+##### PlaceholderToTextEntryRector
+
+Replaces `Placeholder::make()->content()` with `TextEntry::make()->state()` and updates the use import.
+
+```diff
+-use Filament\Forms\Components\Placeholder;
++use Filament\Infolists\Components\TextEntry;
+
+-Placeholder::make('name')->content('value');
++TextEntry::make('name')->state('value');
+```
+
 ##### EmptyLabelToHiddenLabelRector
 
 Replaces `->label('')` with `->hiddenLabel()` on components, or `->iconButton()` on Actions. Table Columns are skipped.
