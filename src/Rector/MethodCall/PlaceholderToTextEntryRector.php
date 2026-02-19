@@ -125,8 +125,13 @@ CODE_SAMPLE
         }
 
         if ($hasExistingTextEntryImport) {
-            // Remove the entire Placeholder use statement to avoid duplicates
-            array_splice($fileNode->stmts, $placeholderUseIndex, 1);
+            // Remove only the Placeholder UseItem; drop the entire Use_ if it's now empty
+            $useStmt = $fileNode->stmts[$placeholderUseIndex];
+            array_splice($useStmt->uses, $placeholderUseItemIndex, 1);
+
+            if ($useStmt->uses === []) {
+                array_splice($fileNode->stmts, $placeholderUseIndex, 1);
+            }
         } else {
             // Rename Placeholder → TextEntry
             $fileNode->stmts[$placeholderUseIndex]->uses[$placeholderUseItemIndex]->name = new Name(self::NEW_CLASS);
