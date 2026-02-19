@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace RectorFilament\Rector\MethodCall;
 
 use PhpParser\Node;
+use PhpParser\Node\Expr\ArrowFunction;
+use PhpParser\Node\Expr\Closure;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
 use PhpParser\Node\Name\FullyQualified;
-use PhpParser\Node\Stmt\UseUse;
+use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Use_;
+use PhpParser\Node\UseItem;
+use PhpParser\NodeVisitor;
+use Rector\PhpParser\Node\FileNode;
 use RectorFilament\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -53,13 +59,23 @@ CODE_SAMPLE
      */
     public function getNodeTypes(): array
     {
-        return [UseUse::class, StaticCall::class, MethodCall::class];
+        return [
+            FileNode::class,
+            StaticCall::class,
+            MethodCall::class,
+            ClassMethod::class,
+            Closure::class,
+            ArrowFunction::class,
+        ];
     }
 
-    public function refactor(Node $node): ?Node
+    /**
+     * @return Node|Node[]|null|NodeVisitor::REMOVE_NODE
+     */
+    public function refactor(Node $node): Node|array|int|null
     {
-        if ($node instanceof UseUse) {
-            return $this->refactorUseUse($node);
+        if ($node instanceof FileNode) {
+            return $this->refactorFileNode($node);
         }
 
         if ($node instanceof StaticCall) {
@@ -70,18 +86,53 @@ CODE_SAMPLE
             return $this->refactorMethodCall($node);
         }
 
+        if ($node instanceof ClassMethod || $node instanceof Closure || $node instanceof ArrowFunction) {
+            return $this->refactorReturnType($node);
+        }
+
         return null;
     }
 
-    private function refactorUseUse(UseUse $node): ?UseUse
+    private function refactorFileNode(FileNode $fileNode): ?FileNode
     {
-        if ($node->name->toString() !== self::OLD_CLASS) {
+        $stmts = $fileNode->stmts;
+        $hasExistingTextEntryImport = false;
+        $placeholderUseIndex = null;
+        $placeholderUseItemIndex = null;
+
+        // Scan for existing imports
+        foreach ($stmts as $i => $stmt) {
+            if (! $stmt instanceof Use_) {
+                continue;
+            }
+
+            foreach ($stmt->uses as $j => $useItem) {
+                $name = $useItem->name->toString();
+
+                if ($name === self::NEW_CLASS) {
+                    $hasExistingTextEntryImport = true;
+                }
+
+                if ($name === self::OLD_CLASS) {
+                    $placeholderUseIndex = $i;
+                    $placeholderUseItemIndex = $j;
+                }
+            }
+        }
+
+        if ($placeholderUseIndex === null) {
             return null;
         }
 
-        $node->name = new Name(self::NEW_CLASS);
+        if ($hasExistingTextEntryImport) {
+            // Remove the entire Placeholder use statement to avoid duplicates
+            array_splice($fileNode->stmts, $placeholderUseIndex, 1);
+        } else {
+            // Rename Placeholder → TextEntry
+            $fileNode->stmts[$placeholderUseIndex]->uses[$placeholderUseItemIndex]->name = new Name(self::NEW_CLASS);
+        }
 
-        return $node;
+        return $fileNode;
     }
 
     private function refactorStaticCall(StaticCall $node): ?StaticCall
@@ -90,7 +141,7 @@ CODE_SAMPLE
             return null;
         }
 
-        // Use short name — the UseUse handler ensures the correct import exists.
+        // Use short name — the import handler ensures the correct import exists.
         $node->class = new Name(self::NEW_SHORT);
 
         return $node;
@@ -117,6 +168,33 @@ CODE_SAMPLE
         $node->name = new Identifier('state');
 
         return $node;
+    }
+
+    private function refactorReturnType(ClassMethod|Closure|ArrowFunction $node): ClassMethod|Closure|ArrowFunction|null
+    {
+        $returnType = $node->returnType;
+
+        if ($returnType === null) {
+            return null;
+        }
+
+        // Rector resolves names via NameResolver with replaceNodes=true, so short
+        // names like `: Placeholder` are already FullyQualified at this point.
+        // We replace with a short Name so the printer outputs `TextEntry` not `\Filament\...`.
+        if ($returnType instanceof FullyQualified && $returnType->toString() === self::OLD_CLASS) {
+            $node->returnType = new Name(self::NEW_SHORT);
+
+            return $node;
+        }
+
+        // Fallback for unresolved short names (e.g. in snippet-only fixtures).
+        if ($returnType instanceof Name && $returnType->toString() === self::OLD_SHORT) {
+            $node->returnType = new Name(self::NEW_SHORT);
+
+            return $node;
+        }
+
+        return null;
     }
 
     private function isOnPlaceholderChain(MethodCall $node): bool
